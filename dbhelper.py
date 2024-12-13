@@ -14,7 +14,7 @@ class DB:
                 database='indigo'
                 # auth_plugin='mysql_native_password'  # Change to 'caching_sha2_password' if needed
             )
-            self.mycursor = self.conn.cursor()
+            self.cursor = self.conn.cursor()
             print("Connection Established")
         except Error as e:
             print(f"Connection Error: {e}")
@@ -22,12 +22,12 @@ class DB:
     def fetch_city_names(self):
 
         city = []
-        self.mycursor.execute("""
+        self.cursor.execute("""
         SELECT DISTINCT(Source) FROM revision.flights
         UNION
         SELECT DISTINCT(Destination) FROM revision.flights
         """)
-        data = self.mycursor.fetchall()
+        data = self.cursor.fetchall()
 
         for item in data:
             city.append(item[0])
@@ -35,21 +35,21 @@ class DB:
         return(city)
 
     def fetch_all_flights(self,Source,Destination):
-        self.mycursor.execute("""
+        self.cursor.execute("""
         SELECT Airline, Route, Dep_Time, Duration, Price FROM revision.flights
             WHERE Source = '{}' AND Destination = '{}'
         """.format(Source,Destination))
-        data = self.mycursor.fetchall()
+        data = self.cursor.fetchall()
         return data
 
     def fetch_airline_frequency(self):
         airline = []
         frequency = []
-        self.mycursor.execute("""
+        self.cursor.execute("""
         SELECT Airline, COUNT(*) FROM revision.flights
         GROUP BY Airline
         """)
-        data = self.mycursor.fetchall()
+        data = self.cursor.fetchall()
 
         for item in data:
             airline.append(item[0])
@@ -60,14 +60,14 @@ class DB:
     def busy_airport(self):
         city = []
         frequency = []
-        self.mycursor.execute("""
+        self.cursor.execute("""
             SELECT Source,COUNT(*) FROM (SELECT Source FROM revision.flights
             UNION ALL
             SELECT Destination FROM revision.flights) t
             GROUP BY t.Source
             ORDER BY COUNT(*) DESC
         """)
-        data = self.mycursor.fetchall()
+        data = self.cursor.fetchall()
 
         for items in data:
             city.append(items[0])
@@ -78,11 +78,11 @@ class DB:
     def daily_frequency(self):
         date = []
         frequency = []
-        self.mycursor.execute(("""
+        self.cursor.execute(("""
         SELECT Date_of_Journey,COUNT(*) FROM revision.flights
             GROUP BY Date_of_Journey;
         """))
-        data = self.mycursor.fetchall()
+        data = self.cursor.fetchall()
 
         for items in data:
             date.append(items[0])
@@ -94,13 +94,13 @@ class DB:
         time = []
         frequency = []
         price = []
-        self.mycursor.execute("""
+        self.cursor.execute("""
         SELECT dep_time,COUNT(*),Price FROM Revision.flights
             GROUP BY dep_time,Price
             ORDER BY COUNT(*) DESC
             LIMIT 20
         """)
-        data = self.mycursor.fetchall()
+        data = self.cursor.fetchall()
 
         for items in data:
             time.append(items[0])
